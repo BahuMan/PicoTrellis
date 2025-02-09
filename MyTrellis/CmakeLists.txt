@@ -1,0 +1,15 @@
+
+
+add_library( MyTrellis
+    MyTrellis.hpp
+    MyTrellis.cpp
+    MyNeoPixel.cpp
+    )
+
+# Add any user requested libraries
+target_link_libraries(MyTrellis 
+    hardware_spi
+    hardware_i2c
+    hardware_pio
+    )
+target_include_directories(MyTrellis PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
