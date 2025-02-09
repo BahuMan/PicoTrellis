@@ -49,6 +49,17 @@ enum {
   SEESAW_ENCODER_BASE = 0x11,
   SEESAW_SPECTRUM_BASE = 0x12,
 };
+/** status module function address registers
+ */
+enum {
+  SEESAW_STATUS_HW_ID = 0x01,
+  SEESAW_STATUS_VERSION = 0x02,
+  SEESAW_STATUS_OPTIONS = 0x03,
+  SEESAW_STATUS_TEMP = 0x04,
+  SEESAW_STATUS_SWRST = 0x7F,
+};
+/** NeoPixel module function address registers
+ */
 enum {
   SEESAW_NEOPIXEL_STATUS = 0x00,
   SEESAW_NEOPIXEL_PIN = 0x01,

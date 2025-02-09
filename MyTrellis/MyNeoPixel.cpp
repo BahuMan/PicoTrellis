@@ -2,7 +2,8 @@
 
 MyNeoPixel::MyNeoPixel(MyTrellis *trel, uint16_t n, uint8_t p, neoPixelType t)
     : begun(false), wrapTrellis(trel), numLEDs(n), pin(p), brightness(0),
-      pixels(NULL), endTime(0), type(t) {}
+      pixels(NULL), endTime(0), type(t) {
+}
 
 MyNeoPixel::~MyNeoPixel() {
   if (pixels)

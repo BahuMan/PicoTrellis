@@ -17,7 +17,6 @@ MyTrellis::MyTrellis(uint8_t addr, i2c_inst_t *i2c)
     for (int i = 0; i < NEO_TRELLIS_NUM_KEYS; i++) {
     _callbacks[i] = NULL;
     }
-
 }
 
 /**************************************************************************/
@@ -31,16 +30,6 @@ MyTrellis::MyTrellis(uint8_t addr, i2c_inst_t *i2c)
 /**************************************************************************/
 bool MyTrellis::begin(uint8_t addr, int8_t flow) {
     _addr = addr;
-
-    //@TODO this might belong to the calling function (or main.cpp) instead of here
-        //Initialize I2C port at 400 kHz
-        i2c_init(_i2c, 800 * 1000);
-        // Initialize I2C pins
-        gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);
-        gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);
-
-    bool ret = pixels.begin(addr, flow);
-
     //why can flow == -1 ? what does that mean? no flow control?
     _flow = flow;
     if (_flow != -1)
@@ -48,6 +37,13 @@ bool MyTrellis::begin(uint8_t addr, int8_t flow) {
         gpio_init(flow);
         gpio_set_dir(flow, GPIO_IN);
     }
+
+    bool ret = pixels.begin(addr, flow);
+    
+    uint8_t c = 0;
+    this->read(SEESAW_STATUS_BASE, SEESAW_STATUS_HW_ID, &c, 1, 500U);
+    printf("seesaw hardware status = %x\n", c);
+
     if (!ret)
     return ret;
 
