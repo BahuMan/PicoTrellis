@@ -42,6 +42,12 @@ add_executable(PicoTrellis PicoTrellis.cpp )
 pico_set_program_name(PicoTrellis "PicoTrellis")
 pico_set_program_version(PicoTrellis "0.1")
 
+target_compile_definitions(PicoTrellis PRIVATE
+    PICO_STDIO_USB_ENABLE_RESET_VIA_VENDOR_INTERFACE=1
+    PICO_STDIO_USB_RESET_INTERFACE_SUPPORT_RESET_TO_BOOTSEL=1
+    PICO_STDIO_USB_RESET_INTERFACE_SUPPORT_MS_OS_20_DESCRIPTOR=1
+)
+
 # Generate PIO header
 # pico_generate_pio_header(PicoTrellis ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
 

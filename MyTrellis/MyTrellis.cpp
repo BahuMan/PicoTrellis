@@ -37,14 +37,15 @@ bool MyTrellis::begin(uint8_t addr, int8_t flow) {
         gpio_init(flow);
         gpio_set_dir(flow, GPIO_IN);
     }
-
-    bool ret = pixels.begin(addr, flow);
     
     uint8_t c = 0;
-    this->read(SEESAW_STATUS_BASE, SEESAW_STATUS_HW_ID, &c, 1, 500U);
-    printf("seesaw hardware status = %x\n", c);
 
-    if (!ret)
+    this->write(SEESAW_STATUS_BASE, SEESAW_STATUS_SWRST, &c, 0);
+    sleep_ms(100);
+    
+    bool ret = pixels.begin(addr, flow);
+
+    if (!ret) 
     return ret;
 
     enableKeypadInterrupt();
@@ -104,6 +105,7 @@ void MyTrellis::read(bool polling) {
     keyEventRaw e[count];
     readKeypad(e, count);
     for (int i = 0; i < count; i++) {
+      printf("%hhx ", e[i]);
       // call any callbacks associated with the key
       e[i].bit.NUM = NEO_TRELLIS_SEESAW_KEY(e[i].bit.NUM);
       if (e[i].bit.NUM < NEO_TRELLIS_NUM_KEYS &&
@@ -112,6 +114,7 @@ void MyTrellis::read(bool polling) {
         _callbacks[e[i].bit.NUM](evt);
       }
     }
+    printf("\n");
   }
 }
 
@@ -159,6 +162,7 @@ void MyTrellis::disableKeypadInterrupt() {
 uint8_t MyTrellis::getKeypadCount() {
     uint8_t ret;
     this->read(SEESAW_KEYPAD_BASE, SEESAW_KEYPAD_COUNT, &ret, 1, 500);
+    printf("%hhu: ", ret);
     return ret;
 }
 /**
@@ -196,10 +200,20 @@ bool MyTrellis::write(uint8_t regHigh, uint8_t regLow,
         sleep_ms(10); //@TODO: remove if possible;
 
     int res = i2c_write_blocking(_i2c, _addr, prefix, 2, true); //DON'T roll into 1 write;
-    if (res != 2 || res == PICO_ERROR_GENERIC) return false;    //Adafruit_I2CDevice.cpp
+    if (res != 2 || res == PICO_ERROR_GENERIC) {
+      printf("write header %hhu:%hhu failed %i\n", regHigh, regLow, res);
+      return false;    //Adafruit_I2CDevice.cpp
+    }
     res = i2c_write_blocking(_i2c, _addr, buf, num, false);     //also uses 2 writes
-    if (res != 2 || res == num) return false;
-
+    if (res != num || res == PICO_ERROR_GENERIC) {
+      printf("write %hhu:%hhu failed at %i\n", regHigh, regLow, res);
+      return false;
+    }
+    if (regLow == SEESAW_NEOPIXEL_BUF_LENGTH) {
+      sleep_ms(1000);
+      printf("\n\nbuffer length set to %hhu %hhu\n", buf[1],buf[2]);
+      sleep_ms(1000);
+    }
     return true;
 }
 
@@ -228,8 +242,11 @@ bool MyTrellis::read(uint8_t regHigh, uint8_t regLow, uint8_t *buf,
         sleep_ms(10);
     }
 
-    int res = i2c_write_blocking(_i2c, _addr, prefix, 2, false);
-    if (res != 2 || res == PICO_ERROR_GENERIC) return false;
+    int res = i2c_write_blocking(_i2c, _addr, prefix, 2, true);
+    if (res != 2 || res == PICO_ERROR_GENERIC) {
+      printf("write before read %hhx:%hhx failed with %i\n", regHigh, regLow, res);
+      return false;
+    }
 
     //@TODO: tune this
     sleep_ms(optionalDelay);
@@ -240,5 +257,9 @@ bool MyTrellis::read(uint8_t regHigh, uint8_t regLow, uint8_t *buf,
     }
 
     res = i2c_read_blocking(_i2c, _addr, buf, num, false);
+    if (res != num || res == PICO_ERROR_GENERIC) {
+      printf("read %hhx:%hhx failed %i\n", regHigh, regLow, res);
+      return false;
+    }
     return (res == num);
 }

@@ -117,6 +117,7 @@ union keyState {
 
 typedef void (*TrellisCallback)(keyEvent evt);
 #define NEO_GRB ((1 << 6) | (1 << 4) | (0 << 2) | (2))
+#define NEO_KHZ400 0x0100 // 400 KHz datastream
 #define NEO_KHZ800 0x0000 // 800 KHz datastream
 typedef uint16_t neoPixelType;
 #define SEESAW_ADDRESS (0x49)

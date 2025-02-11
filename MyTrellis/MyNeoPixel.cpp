@@ -40,7 +40,7 @@ void MyNeoPixel::updateType(neoPixelType t) {
     gOffset = (t >> 2) & 0b11;
     bOffset = t & 0b11;
     is800KHz = (t < 256); // 400 KHz flag is 1<<8
-    uint8_t use800KHz = is800KHz?0xFF:0x00;
+    uint8_t use800KHz = 1U; //is800KHz?0xFF:0x00;
     wrapTrellis->write(SEESAW_NEOPIXEL_BASE, SEESAW_NEOPIXEL_SPEED, &use800KHz, 1);
 
     // If bytes-per-pixel has changed (and pixel data was previously
@@ -109,6 +109,7 @@ void MyNeoPixel::setPixelColor(uint16_t n, uint8_t r, uint8_t g,
     writeBuf[4] = p[2];
     writeBuf[5] = 0; //regardless of wOffset, we DON'T specify white color
 
+    //printf("%u: %hhx %hhx %hhx %hhx %hhx %hhx\n", n, writeBuf[0], writeBuf[1], writeBuf[2], writeBuf[3], writeBuf[4], writeBuf[5]);
     wrapTrellis->write(SEESAW_NEOPIXEL_BASE, SEESAW_NEOPIXEL_BUF, writeBuf, len + 2);
   }
 }
@@ -145,6 +146,7 @@ void MyNeoPixel::setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b,
     writeBuf[4] = p[2];
     writeBuf[5] = p[3];
 
+    //printf("%u: %hhx %hhx %hhx %hhx %hhx %hhx\n", n, writeBuf[0], writeBuf[1], writeBuf[2], writeBuf[3], writeBuf[4], writeBuf[5]);
     wrapTrellis->write(SEESAW_NEOPIXEL_BASE, SEESAW_NEOPIXEL_BUF, writeBuf, len + 2);
   }
 }
@@ -182,6 +184,7 @@ void MyNeoPixel::setPixelColor(uint16_t n, uint32_t c) {
     writeBuf[4] = p[2];
     writeBuf[5] = (wOffset == rOffset ? 0 : w);
 
+    //printf("%u: %hhx %hhx %hhx %hhx %hhx %hhx\n", n, writeBuf[0], writeBuf[1], writeBuf[2], writeBuf[3], writeBuf[4], writeBuf[5]);
     wrapTrellis->write(SEESAW_NEOPIXEL_BASE, SEESAW_NEOPIXEL_BUF, writeBuf, len + 2);
   }
 }
