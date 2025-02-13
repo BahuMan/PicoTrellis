@@ -12,8 +12,12 @@ MyNeoPixel::~MyNeoPixel() {
 
 bool MyNeoPixel::begin(uint8_t addr, int8_t flow) {
     updateType(type);
-    updateLength(numLEDs);
+    sleep_ms(100);
     setPin(pin);
+    sleep_ms(100);
+    updateLength(numLEDs);
+    sleep_ms(100);
+
     begun=true; //?
     return true;
 }
@@ -103,7 +107,7 @@ void MyNeoPixel::setPixelColor(uint16_t n, uint8_t r, uint8_t g,
 
     uint8_t writeBuf[6];
     writeBuf[0] = (offset >> 8);
-    writeBuf[1] = offset;
+    writeBuf[1] = offset & 0xFF;
     writeBuf[2] = p[0]; //replaced memcp with 4 assignments
     writeBuf[3] = p[1];
     writeBuf[4] = p[2];
@@ -146,7 +150,6 @@ void MyNeoPixel::setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b,
     writeBuf[4] = p[2];
     writeBuf[5] = p[3];
 
-    //printf("%u: %hhx %hhx %hhx %hhx %hhx %hhx\n", n, writeBuf[0], writeBuf[1], writeBuf[2], writeBuf[3], writeBuf[4], writeBuf[5]);
     wrapTrellis->write(SEESAW_NEOPIXEL_BASE, SEESAW_NEOPIXEL_BUF, writeBuf, len + 2);
   }
 }
@@ -178,7 +181,7 @@ void MyNeoPixel::setPixelColor(uint16_t n, uint32_t c) {
 
     uint8_t writeBuf[6];
     writeBuf[0] = (offset >> 8);
-    writeBuf[1] = offset;
+    writeBuf[1] = offset & 0xFF;
     writeBuf[2] = p[0]; //replaced memcp with 4 assignments
     writeBuf[3] = p[1];
     writeBuf[4] = p[2];

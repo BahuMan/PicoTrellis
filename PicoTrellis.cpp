@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include <pico\version.h>
+//#include <pico\version.h>
 #include "pico/stdlib.h"
 //copied from https://www.raspberrypi.com/documentation/pico-sdk/hardware.html
 //for bi_decl(bi_2pins_with_func( ... ))
 #include "pico/binary_info.h"
 #include "hardware/i2c.h"
-#include "hardware/pio.h"
+//#include "hardware/pio.h"
 #include "MyTrellis.hpp"
 
 //forward declaration of 2 functions defined at EOF:
@@ -39,8 +39,10 @@ int main()
 
     i2c_inst_t *myI2C = i2c_get_instance(0);
     printf("I2C retrieved\n");
-    //Initialize I2C port at 800 kHz
-    i2c_init(myI2C, 100 * 1000);
+    //Initialize I2C port at 400 kHz
+    //this speed doesn't seem to be linked to neopixel speed, which HAS to be 800Khz
+    //however, 100Khz seems to cause more out-of-sync
+    i2c_init(myI2C, 400 * 1000);
     // Initialize I2C pins
     gpio_set_function(I2C_SDA, GPIO_FUNC_I2C);
     gpio_set_function(I2C_SCL, GPIO_FUNC_I2C);
@@ -58,17 +60,17 @@ int main()
     }
     
     //activate all keys and set callbacks
-    //for(int i=0; i<NEO_TRELLIS_NUM_KEYS; i++){
-    //    trellis.activateKey(i, SEESAW_KEYPAD_EDGE_RISING);
-    //    trellis.activateKey(i, SEESAW_KEYPAD_EDGE_FALLING);
-    //    trellis.registerCallback(i, blink);
-    //}
+    for(int i=0; i<NEO_TRELLIS_NUM_KEYS; i++){
+        trellis.activateKey(i, SEESAW_KEYPAD_EDGE_RISING);
+        trellis.activateKey(i, SEESAW_KEYPAD_EDGE_FALLING);
+        trellis.registerCallback(i, blink);
+    }
 
     while (true) {
       
         //do a little animation to show we're on
         for (uint16_t i=0; i<trellis.pixels.numPixels(); i++) {
-          trellis.pixels.setPixelColor(i, 100, 100, 255);
+          trellis.pixels.setPixelColor(i, 100, 0, 0);
           trellis.pixels.show();
           sleep_ms(200);
         }

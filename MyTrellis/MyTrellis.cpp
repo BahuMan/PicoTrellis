@@ -48,7 +48,7 @@ bool MyTrellis::begin(uint8_t addr, int8_t flow) {
     if (!ret) 
     return ret;
 
-    enableKeypadInterrupt();
+    //enableKeypadInterrupt();
 
     return ret;
 }
@@ -191,29 +191,24 @@ bool MyTrellis::readKeypad(keyEventRaw *buf, uint8_t count) {
  ****************************************************************************************/
 bool MyTrellis::write(uint8_t regHigh, uint8_t regLow,
                             uint8_t *buf, uint8_t num) {
-    uint8_t prefix[2];
+    uint8_t prefix[2+num];
     prefix[0] = (uint8_t)regHigh;
     prefix[1] = (uint8_t)regLow;
+    for (int cp=0; cp<num; ++cp) prefix[2+cp] = buf[cp];
 
     if (_flow != -1)
         while (!gpio_get(_flow))
         sleep_ms(10); //@TODO: remove if possible;
 
-    int res = i2c_write_blocking(_i2c, _addr, prefix, 2, true); //DON'T roll into 1 write;
-    if (res != 2 || res == PICO_ERROR_GENERIC) {
-      printf("write header %hhu:%hhu failed %i\n", regHigh, regLow, res);
-      return false;    //Adafruit_I2CDevice.cpp
-    }
-    res = i2c_write_blocking(_i2c, _addr, buf, num, false);     //also uses 2 writes
-    if (res != num || res == PICO_ERROR_GENERIC) {
-      printf("write %hhu:%hhu failed at %i\n", regHigh, regLow, res);
+    int res = i2c_write_blocking(_i2c, _addr, prefix, 2+num, false);
+    if (res != (2+num) || res == PICO_ERROR_GENERIC) {
+      printf("write totality %hhu:%hhu failed %i\n", regHigh, regLow, res);
       return false;
     }
-    if (regLow == SEESAW_NEOPIXEL_BUF_LENGTH) {
-      sleep_ms(1000);
-      printf("\n\nbuffer length set to %hhu %hhu\n", buf[1],buf[2]);
-      sleep_ms(1000);
-    }
+    //else {
+    //  printf("write totality %hhu:%hhu SUCCESS %i\n", regHigh, regLow, res);
+    //}
+
     return true;
 }
 
@@ -242,7 +237,7 @@ bool MyTrellis::read(uint8_t regHigh, uint8_t regLow, uint8_t *buf,
         sleep_ms(10);
     }
 
-    int res = i2c_write_blocking(_i2c, _addr, prefix, 2, true);
+    int res = i2c_write_blocking(_i2c, _addr, prefix, 2, false);
     if (res != 2 || res == PICO_ERROR_GENERIC) {
       printf("write before read %hhx:%hhx failed with %i\n", regHigh, regLow, res);
       return false;
